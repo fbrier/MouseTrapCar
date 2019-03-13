@@ -13,7 +13,7 @@
 #include <Stepper.h>
 #include "IRremote.h"
 
-#define IR_IN_PIN 16
+#define IR_IN_PIN 13
 #define DRIVE_ROT_INPUT_PIN 2
 
 // Number of interrupts where all energy is used from the trap
@@ -44,7 +44,7 @@ unsigned int numTicks = 0;
 
 // initialize the stepper library on pins 8 through 11:
 Stepper myStepper(K_StepsPerRevolution, 8, 10, 9, 11);
-IRrecv irecv(IR_IN_PIN);
+IRrecv irrecv(IR_IN_PIN);
 decode_results results;
 
 //===================================================
@@ -52,6 +52,10 @@ decode_results results;
 void RecalcStopPoint()
 {
    stopTicks = (K_MaxRotationInterruptCount / driveLegs) - K_ReserveEnergy; 
+   Serial.print("Stop Ticks = ");
+   Serial.println(stopTicks);
+   Serial.print("driveLegs = ");
+   Serial.println(driveLegs);
 }
 
 //===================================================
@@ -59,7 +63,7 @@ void RecalcStopPoint()
 void DriveTickInterrupt(void)
 {
    // If we are at the stop point
-   if (numTicks > stopPoint)
+   if (numTicks > stopTicks)
    {
       // When going forward, move to the forward neutral position
       if (curDriveLeg % 2)
@@ -100,9 +104,10 @@ void loop()
    {
       translateIR();
       irrecv.resume();  
+      Serial.print(".");
    }
 
-   /*
+#ifdef TEST_STEPPER
     // step one revolution  in one direction:
   static int runNumber = 0;
   
@@ -129,7 +134,7 @@ void loop()
   }
    delay(1000);
   runNumber++;
-  */
+#endif
   
   // myStepper.step(stepsPerRevolution);
   // delay(250);

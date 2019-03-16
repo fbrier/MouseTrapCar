@@ -12,10 +12,12 @@ project(${PROJECT_NAME})
 set(${PROJECT_NAME}_HDRS User_Setup.h)
 
 ### Additional static libraries to include in the target.
-# set(${PROJECT_NAME}_LIBS)
+#set(${PROJECT_NAME}_LIBS)
+
+set(${PROJECT_NAME}_SRCS Transmission.ino IrControl.ino)
 
 ### Main sketch file
-set(${PROJECT_NAME}_SKETCH mouse_trap_car.ino)
+set(${PROJECT_NAME}_SKETCH MouseTrapCar.ino)
 
 ### Add project directories into the build
 # add_subdirectory()
@@ -23,10 +25,12 @@ set(${PROJECT_NAME}_SKETCH mouse_trap_car.ino)
 ### Additional settings to add non-standard or your own Arduino libraries.
 # For this example (libs will contain additional arduino libraries)
 # An Arduino library my_lib will contain files in libs/my_lib/: my_lib.h, my_lib.cpp + any other cpp files
-# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libraries)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libraries)
 
 # For nested library sources replace ${LIB_NAME} with library name for each library
-# set(_RECURSE true)
+set(Stepper_RECURSE true)
+set(IRremote_RECURSE true)
 
 #### Additional settings for programmer. From programmers.txt
 # set(${PROJECT_NAME}_PROGRAMMER avrispmkii)

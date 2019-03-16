@@ -4,4 +4,7 @@ We are starting out with sketch files, but plan to move the code into classes so
 
 ## Build Instructions
 Since I own CLion, having it might be helpful, but you can probably just build with CMake. However, if you do use CLion,
-this project was build using the [CLionArduinoPlugin](https://github.com/vsch/CLionArduinoPlugin).
+this project was built using the [CLionArduinoPlugin](https://github.com/vsch/CLionArduinoPlugin).
+
+##ToDo:
+Pull in IR library using [Arduino CMake](https://github.com/queezythegreat/arduino-cmake)

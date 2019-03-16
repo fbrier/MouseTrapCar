@@ -9,7 +9,8 @@
 
 
 */
-
+#include <Arduino.h>
+#include "User_Setup.h"
 #include <Stepper.h>
 #include "IRremote.h"
 
@@ -19,7 +20,7 @@
 // Number of interrupts where all energy is used from the trap
 #define K_MaxRotationInterruptCount 400  
 
-// The amount of engergy to save for each turn around leg
+// The amount of energy to save for each turn around leg
 #define K_ReserveEnergy 10
 
 

@@ -15,6 +15,7 @@
 #define R_B +150
 #define B_F +250
 #define F_NF +1000
+extern String gearStrings[];
 
 //########################################
 // Go to Forward FROM curGear

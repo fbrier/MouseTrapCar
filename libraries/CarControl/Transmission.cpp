@@ -2,48 +2,57 @@
 // extern enum GearPositions;
 
 
-// NF - Neutral
-// F - Forward
-// R - Reverse
-// B - Break
-// FROM_TO
-#define NF_F -1000
-#define F_B -150
-#define B_R -250
-#define R_NR -1000
-#define NR_R +1000
-#define R_B +150
-#define B_F +250
-#define F_NF +1000
+
+#include <WString.h>
+#include <HardwareSerial.h>
+#include <USBAPI.h>
+#include "Transmission.h"
+
 extern String gearStrings[];
 
+// We will force the tranny into a Neutral Forward Position
+Transmission::Transmission() : _stepper(K_StepsPerRevolution, 8, 10, 9, 11)
+{
+   _numSteps = NR_R + R_B + B_F + F_NF;
+   _currentGear = UNKNOWN_GEAR;
+   _stepper.setSpeed(K_RolePerMinute);
+   pinMode(DRIVE_ROT_INPUT_PIN, INPUT);
+
+   Serial.print("Init: ");
+   Serial.println(_numSteps);
+}
+
+void Transmission::Init()
+{
+
+}
 //########################################
 // Go to Forward FROM curGear
 //########################################
-int GoForward(int curGear)
+int Transmission::GoForward()
 {
    int numSteps = 0;
    
-   switch (curGear)
+   switch (_currentGear)
    {
       case REVERSE_GEAR:
       // We need to move through the brake to forward
-      numSteps = R_B + B_F;
+         numSteps = R_B + B_F;
       break;
       
       case NEUTRAL_F_GEAR:
       // We need to move to forward
-      numSteps = NF_F;
+         numSteps = NF_F;
       break;
       
       case NEUTRAL_R_GEAR:
       // We need to move through the reverse, brake to forward
-      numSteps = NR_R + R_B + B_F;
+         numSteps = NR_R + R_B + B_F;
       break;
 
       case BRAKE_GEAR:
       // We need to move to the Forward position
-      numSteps = B_F;
+         numSteps = B_F;
       break;
       
       case FORWARD_GEAR:  // FALL THROUGH
@@ -61,11 +70,11 @@ int GoForward(int curGear)
 //########################################
 // Go to Reverse FROM curGear
 //########################################
-int GoReverse(int curGear)
+int Transmission::GoReverse()
 {
    int numSteps = 0;
    
-   switch (curGear)
+   switch (_currentGear)
    {
       case FORWARD_GEAR:
       // We need to move through the brake to Reverse
@@ -100,11 +109,11 @@ int GoReverse(int curGear)
 //########################################
 // Go to EITHER Neutral FROM curGear
 //########################################
-int GoNeutral(int curGear)
+int Transmission::GoNeutral()
 {
    int numSteps = 0;
    
-   switch (curGear)
+   switch (_currentGear)
    {
       case FORWARD_GEAR:
       // We need to move to Neutral Forward
@@ -136,11 +145,11 @@ int GoNeutral(int curGear)
 //########################################
 // Go to Brake FROM curGear
 //########################################
-int GoBrake(int curGear)
+int Transmission::GoBrake()
 {
    int numSteps = 0;
    
-   switch (curGear)
+   switch (_currentGear)
    {
       case FORWARD_GEAR:
       // We need to move through the brake to Reverse
@@ -171,24 +180,14 @@ int GoBrake(int curGear)
    return numSteps;
 }
 
-// We will force the tranny into a Neutral Forward Position
-int InitTransmission()
-{
-   int numSteps = NR_R + R_B + B_F + F_NF;
 
-   Serial.print("Init: ");
-   Serial.println(numSteps);   
-   return numSteps;
-}
-
-void ChangeGear(int requestedGear)
+void Transmission::ChangeGear(int requestedGear)
 {
    String myStr = "ABC";
-   static int currentGear = UNKNOWN_GEAR;
    int steps2move = 0;
 
-   String cGear = gearStrings[currentGear];
-   String rGear = gearStrings[requestedGear];
+   String cGear = GEAR_NAMES[_currentGear];
+   String rGear = GEAR_NAMES[requestedGear];
    
    Serial.print("Current Gear: ");
    Serial.println(cGear);
@@ -198,38 +197,39 @@ void ChangeGear(int requestedGear)
    switch (requestedGear)
    {
       case FORWARD_GEAR:
-      steps2move = GoForward(currentGear);
+         steps2move = GoForward();
       break;
       
       case REVERSE_GEAR:
-      steps2move = GoReverse(currentGear);
+         steps2move = GoReverse();
       break;
       
       case NEUTRAL_F_GEAR:
       case NEUTRAL_R_GEAR:
-      steps2move = GoNeutral(currentGear);
+         steps2move = GoNeutral();
       break;
       
       case BRAKE_GEAR:
-      steps2move = GoBrake(currentGear);
+         steps2move = GoBrake();
       break;
       
       case UNKNOWN_GEAR:
-      steps2move = InitTransmission();
+         // ToDo: Put this in the constructor. Is UNKNOWN_GEAR a possibility at this point?
+         //steps2move = Init();
       break;
    }  
 
    if (requestedGear != UNKNOWN_GEAR)
    {
-      currentGear = requestedGear;
+      _currentGear = requestedGear;
    }
    else
    {
-      currentGear = NEUTRAL_F_GEAR;
+      _currentGear = NEUTRAL_F_GEAR;
    }
       
    Serial.println(steps2move);
-   myStepper.step(steps2move);
+   _stepper.step(steps2move);
    delay(500);
 }
 
